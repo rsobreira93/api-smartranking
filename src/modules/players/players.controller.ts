@@ -1,7 +1,8 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post } from '@nestjs/common';
 
 import { CreatePlayerDTO } from './dtos/create-player-dto';
-import { PlayersService } from './players.service';
+import { Player } from './interfaces/jogador.interface';
+import { PlayersService } from './use-cases/players.service';
 
 @Controller('api/v1/players')
 export class PlayersController {
@@ -18,5 +19,10 @@ export class PlayersController {
     });
 
     return playerService;
+  }
+
+  @Get()
+  async listPlayers(): Promise<Player[]> {
+    return this.playersService.listPlayers();
   }
 }
