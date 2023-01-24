@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import { CreatePlayerDTO } from './dtos/create-player-dto';
-import { Player } from './interfaces/jogador.interface';
+import { CreatePlayerDTO } from '../dtos/create-player-dto';
+import { Player } from '../interfaces/jogador.interface';
 
 @Injectable()
 export class PlayersService {
@@ -10,7 +10,15 @@ export class PlayersService {
   private readonly logger = new Logger(PlayersService.name);
 
   async execute(createPlayerDTO: CreatePlayerDTO): Promise<void> {
-    this.createPlayer(createPlayerDTO);
+    const { email } = createPlayerDTO;
+
+    const playerAlreadyExists = this.players.find((p) => p.email === email);
+
+    if (playerAlreadyExists) {
+      this.update(playerAlreadyExists, createPlayerDTO);
+    } else {
+      this.createPlayer(createPlayerDTO);
+    }
   }
 
   private createPlayer(createPlayerDTO: CreatePlayerDTO): void {
@@ -26,8 +34,19 @@ export class PlayersService {
       rankingPosition: 1,
     };
 
-    this.logger.log(player);
-
     this.players.push(player);
+  }
+
+  async listPlayers(): Promise<Player[]> {
+    return this.players;
+  }
+
+  private update(
+    playerAlreadyExists: Player,
+    createPlayerDTO: CreatePlayerDTO,
+  ): void {
+    const { name } = createPlayerDTO;
+
+    playerAlreadyExists.name = name;
   }
 }
