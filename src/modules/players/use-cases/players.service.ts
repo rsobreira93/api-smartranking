@@ -1,7 +1,7 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Player } from './../interfaces/jogador.interface';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { CreatePlayerDTO } from '../dtos/create-player-dto';
-import { Player } from '../interfaces/jogador.interface';
 
 @Injectable()
 export class PlayersService {
@@ -41,6 +41,16 @@ export class PlayersService {
     return this.players;
   }
 
+  async findByEmail(email: string): Promise<Player> {
+    const player = this.players.find((player) => player.email === email);
+
+    if (!player) {
+      throw new NotFoundException(`Player ${email} not found`);
+    }
+
+    return player;
+  }
+
   private update(
     playerAlreadyExists: Player,
     createPlayerDTO: CreatePlayerDTO,
@@ -48,5 +58,15 @@ export class PlayersService {
     const { name } = createPlayerDTO;
 
     playerAlreadyExists.name = name;
+  }
+
+  async deletePlayer(email: string): Promise<void> {
+    const playerIndex = this.players.findIndex((p) => p.email === email);
+
+    if (playerIndex < -1) {
+      throw new NotFoundException(`Player ${email} does not exist`);
+    }
+
+    this.players.splice(playerIndex, 1);
   }
 }
